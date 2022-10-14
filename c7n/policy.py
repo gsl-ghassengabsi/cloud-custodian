@@ -1043,6 +1043,7 @@ class PolicyConditions:
             'resource': self.policy.resource_type,
             'provider': self.policy.provider_name,
             'account_id': self.policy.options.account_id,
+            'slack_channel_webhook': self.policy.options.slack_channel_webhook,
             'now': datetime.now(tzutil.tzutc()),
             'policy': self.policy.data
         })
@@ -1198,7 +1199,6 @@ class Policy:
             if 'role' in self.data['mode'] and not self.data['mode']['role'].startswith("arn:aws"):
                 self.data['mode']['role'] = "arn:%s:iam::%s:role/%s" % \
                     (partition, self.options.account_id, self.data['mode']['role'])
-
         variables.update({
             # standard runtime variables for interpolation
             'account': '{account}',
