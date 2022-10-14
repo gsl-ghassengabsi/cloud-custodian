@@ -579,8 +579,8 @@ def run_account(account, region, policies_config, output_path,
     config = Config.empty(
         region=region, cache=cache_path,
         cache_period=cache_period, dryrun=dryrun, output_dir=output_path,
-        account_id=account['account_id'], metrics_enabled=metrics,
-        log_group=None, profile=None, external_id=None)
+        account_id=account['account_id'], slack_channel_webhook=account['slack_channel_webhook'],
+        metrics_enabled=metrics, log_group=None, profile=None, external_id=None)
 
     env_vars = account_tags(account)
 
