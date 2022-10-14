@@ -34,6 +34,7 @@ class Config(Bag):
             'cache': '',
             'profile': None,
             'account_id': None,
+            'slack_channel_webhook': None,
             'assume_role': None,
             'external_id': None,
             'log_group': None,
