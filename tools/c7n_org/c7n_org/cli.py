@@ -605,7 +605,6 @@ def run_account(account, region, policies_config, output_path,
             # Extend policy execution conditions with account information
             p.conditions.env_vars['account'] = account
             # Variable expansion and non schema validation (not optional)
-            p.expand_variables(p.get_variables(account.get('slack_channel_webhook', {})))
             p.expand_variables(p.get_variables(account.get('vars', {})))
             p.validate()
             log.debug(
@@ -691,6 +690,13 @@ def run(config, use, output_dir, accounts, tags, region,
     with executor(max_workers=WORKER_COUNT) as w:
         futures = {}
         for a in accounts_config['accounts']:
+            for policy in custodian_config['policies']:
+                for action in policy["actions"]:
+                    if action["type"] == "notify":
+                        for count, to in enumerate(action["to"]):
+                            if "{slack_channel_webhook}" in to:
+                                action['to'][count] = action['to'][count].replace("{slack_channel_webhook}",
+                                                                                  a['slack_channel_webhook'])
             for r in resolve_regions(region or a.get('regions', ()), a):
                 futures[w.submit(
                     run_account,
