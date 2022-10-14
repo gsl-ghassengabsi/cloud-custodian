@@ -68,6 +68,7 @@ CONFIG_SCHEMA = {
                     'type': 'string',
                     'pattern': '^[0-9]{12}$',
                     'minLength': 12, 'maxLength': 12},
+                'slack_channel_webhook': {'type': 'string'},
                 'profile': {'type': 'string', 'minLength': 3},
                 'tags': {'type': 'array', 'items': {'type': 'string'}},
                 'regions': {'type': 'array', 'items': {'type': 'string'}},

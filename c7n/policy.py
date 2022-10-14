@@ -1203,6 +1203,7 @@ class Policy:
             # standard runtime variables for interpolation
             'account': '{account}',
             'account_id': self.options.account_id,
+            'slack_channel_webhook': self.options.slack_channel_webhook,
             'partition': partition,
             'region': self.options.region,
             # non-standard runtime variables from local filter/action vocabularies
