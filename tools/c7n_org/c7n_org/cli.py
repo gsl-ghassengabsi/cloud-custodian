@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Run a custodian policy across an organization's accounts
 """
-
+import copy
 import csv
 from collections import Counter
 import logging
@@ -690,14 +690,13 @@ def run(config, use, output_dir, accounts, tags, region,
     with executor(max_workers=WORKER_COUNT) as w:
         futures = {}
         for a in accounts_config['accounts']:
-            custodian_conf = custodian_config
+            custodian_conf = copy.deepcopy(custodian_config)
             for policy in custodian_conf['policies']:
                 for action in policy["actions"]:
                     if action["type"] == "notify":
                         for count, to in enumerate(action["to"]):
                             if "{slack_channel_webhook}" in to:
-                                action['to'][count] = action['to'][count].replace("{slack_channel_webhook}",
-                                                                                  a['slack_channel_webhook'])
+                                action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
             for r in resolve_regions(region or a.get('regions', ()), a):
                 futures[w.submit(
                     run_account,
