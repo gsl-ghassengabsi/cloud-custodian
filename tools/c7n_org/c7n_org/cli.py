@@ -579,8 +579,8 @@ def run_account(account, region, policies_config, output_path,
     config = Config.empty(
         region=region, cache=cache_path,
         cache_period=cache_period, dryrun=dryrun, output_dir=output_path,
-        account_id=account['account_id'], slack_channel_webhook=account['slack_channel_webhook'],
-        metrics_enabled=metrics, log_group=None, profile=None, external_id=None)
+        account_id=account['account_id'], metrics_enabled=metrics,
+        log_group=None, profile=None, external_id=None)
 
     env_vars = account_tags(account)
 
@@ -690,7 +690,8 @@ def run(config, use, output_dir, accounts, tags, region,
     with executor(max_workers=WORKER_COUNT) as w:
         futures = {}
         for a in accounts_config['accounts']:
-            for policy in custodian_config['policies']:
+            custodian_conf = custodian_config
+            for policy in custodian_conf['policies']:
                 for action in policy["actions"]:
                     if action["type"] == "notify":
                         for count, to in enumerate(action["to"]):
@@ -701,7 +702,7 @@ def run(config, use, output_dir, accounts, tags, region,
                 futures[w.submit(
                     run_account,
                     a, r,
-                    custodian_config,
+                    custodian_conf,
                     output_dir,
                     cache_period,
                     cache_path,
