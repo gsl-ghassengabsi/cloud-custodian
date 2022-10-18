@@ -692,6 +692,7 @@ def run(config, use, output_dir, accounts, tags, region,
             custodian_conf = copy.deepcopy(custodian_config)
             for policy in custodian_conf['policies']:
                 for action in policy["actions"]:
+                    log.info("action is %s" % action)
                     if action["type"] == "notify":
                         for count, to in enumerate(action["to"]):
                             if "{slack_channel_webhook}" in to:
