@@ -693,12 +693,18 @@ def run(config, use, output_dir, accounts, tags, region,
             for a in accounts_config['accounts']:
                 custodian_conf = copy.deepcopy(custodian_config)
                 log.info("Policy conf is %s" % custodian_conf)
-                for policy in custodian_conf['policies']:
-                    for action in policy["actions"]:
-                        if action["type"] == "notify":
-                            for count, to in enumerate(action["to"]):
-                                if "{slack_channel_webhook}" in to:
-                                    action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
+                try:
+                    for policy in custodian_conf['policies']:
+                        for action in policy["actions"]:
+                            if action["type"] == "notify":
+                                for count, to in enumerate(action["to"]):
+                                    log.info("count %s" % count)
+                                    log.info("count %s" % to)
+                                    if "{slack_channel_webhook}" in to:
+                                        log.info("condition ok %s" % to)
+                                        action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
+                except Exception as error:
+                    log.error("boucle for error %s" % error)
                 for r in resolve_regions(region or a.get('regions', ()), a):
                     futures[w.submit(
                         run_account,
