@@ -674,59 +674,63 @@ def run(config, use, output_dir, accounts, tags, region,
         policy, policy_tags, cache_period, cache_path, metrics,
         dryrun, debug, verbose, metrics_uri):
     """run a custodian policy across accounts"""
-    accounts_config, custodian_config, executor = init(
-        config, use, debug, verbose, accounts, tags, policy, policy_tags=policy_tags)
-    policy_counts = Counter()
-    success = True
+    try:
+        accounts_config, custodian_config, executor = init(
+            config, use, debug, verbose, accounts, tags, policy, policy_tags=policy_tags)
+        policy_counts = Counter()
+        success = True
 
-    if metrics_uri:
-        metrics = metrics_uri
+        if metrics_uri:
+            metrics = metrics_uri
 
-    if not cache_path:
-        cache_path = os.path.expanduser("~/.cache/c7n-org")
-        if not os.path.exists(cache_path):
-            os.makedirs(cache_path)
+        if not cache_path:
+            cache_path = os.path.expanduser("~/.cache/c7n-org")
+            if not os.path.exists(cache_path):
+                os.makedirs(cache_path)
 
-    with executor(max_workers=WORKER_COUNT) as w:
-        futures = {}
-        for a in accounts_config['accounts']:
-            custodian_conf = copy.deepcopy(custodian_config)
-            for policy in custodian_conf['policies']:
-                for action in policy["actions"]:
-                    if action["type"] == "notify":
-                        for count, to in enumerate(action["to"]):
-                            if "{slack_channel_webhook}" in to:
-                                action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
-            for r in resolve_regions(region or a.get('regions', ()), a):
-                futures[w.submit(
-                    run_account,
-                    a, r,
-                    custodian_conf,
-                    output_dir,
-                    cache_period,
-                    cache_path,
-                    metrics,
-                    dryrun,
-                    debug)] = (a, r)
+        with executor(max_workers=WORKER_COUNT) as w:
+            futures = {}
+            for a in accounts_config['accounts']:
+                custodian_conf = copy.deepcopy(custodian_config)
+                log.info("Policy conf is %s" % custodian_conf)
+                for policy in custodian_conf['policies']:
+                    for action in policy["actions"]:
+                        if action["type"] == "notify":
+                            for count, to in enumerate(action["to"]):
+                                if "{slack_channel_webhook}" in to:
+                                    action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
+                for r in resolve_regions(region or a.get('regions', ()), a):
+                    futures[w.submit(
+                        run_account,
+                        a, r,
+                        custodian_conf,
+                        output_dir,
+                        cache_period,
+                        cache_path,
+                        metrics,
+                        dryrun,
+                        debug)] = (a, r)
 
-        for f in as_completed(futures):
-            a, r = futures[f]
-            if f.exception():
-                if debug:
-                    raise
-                log.warning(
-                    "Error running policy in %s @ %s exception: %s",
-                    a['name'], r, f.exception())
-                continue
+            for f in as_completed(futures):
+                a, r = futures[f]
+                if f.exception():
+                    if debug:
+                        raise
+                    log.warning(
+                        "Error running policy in %s @ %s exception: %s",
+                        a['name'], r, f.exception())
+                    continue
 
-            account_region_pcounts, account_region_success = f.result()
-            for p in account_region_pcounts:
-                policy_counts[p] += account_region_pcounts[p]
+                account_region_pcounts, account_region_success = f.result()
+                for p in account_region_pcounts:
+                    policy_counts[p] += account_region_pcounts[p]
 
-            if not account_region_success:
-                success = False
+                if not account_region_success:
+                    success = False
 
-    log.info("Policy resource counts %s" % policy_counts)
+        log.info("Policy resource counts %s" % policy_counts)
+    except Exception as error:
+        log.error(error)
 
     if not success:
         sys.exit(1)
