@@ -693,7 +693,7 @@ def run(config, use, output_dir, accounts, tags, region,
             for policy in custodian_conf['policies']:
                 for action in policy["actions"]:
                     log.info("action is %s" % action)
-                    if action["type"] == "notify":
+                    if type(action) is dict and action["type"] == "notify":
                         for count, to in enumerate(action["to"]):
                             if "{slack_channel_webhook}" in to:
                                 action['to'][count] = action['to'][count].replace("{slack_channel_webhook}", a['slack_channel_webhook'])
