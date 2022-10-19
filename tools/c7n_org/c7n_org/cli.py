@@ -691,7 +691,7 @@ def run(config, use, output_dir, accounts, tags, region,
         for a in accounts_config['accounts']:
             custodian_conf = copy.deepcopy(custodian_config)
             for policy in custodian_conf['policies']:
-                if policy["actions"]:
+                if "actions" in policy:
                     for action in policy["actions"]:
                         log.info("action is %s" % action)
                         if type(action) is dict and action["type"] == "notify":
