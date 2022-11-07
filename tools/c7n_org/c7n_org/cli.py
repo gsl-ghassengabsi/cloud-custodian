@@ -686,7 +686,7 @@ def run(config, use, output_dir, accounts, tags, region,
             cache_path = os.path.expanduser("~/.cache/c7n-org")
             if not os.path.exists(cache_path):
                 os.makedirs(cache_path)
-
+        logging.info("worker count is {}".format(WORKER_COUNT))
         with executor(max_workers=WORKER_COUNT) as w:
             futures = {}
             for a in accounts_config['accounts']:
