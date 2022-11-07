@@ -3,6 +3,7 @@
 """
 Authentication utilities
 """
+import logging
 import os
 
 from botocore.credentials import RefreshableCredentials
@@ -84,7 +85,7 @@ def assumed_session(role_arn, session_name, session=None, region=None, external_
     retry = get_retry(('Throttling',))
 
     def refresh():
-
+        logging.info("refresh")
         parameters = {"RoleArn": role_arn, "RoleSessionName": session_name}
 
         if external_id is not None:
