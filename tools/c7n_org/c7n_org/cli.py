@@ -698,7 +698,7 @@ def run(config, use, output_dir, accounts, tags, region,
                             if type(action) is dict and action["type"] == "notify":
                                 for count, to in enumerate(action["to"]):
                                     if "{slack_channel_webhook_url}" in to:
-                                        action['to'][count] = action['to'][count].replace("{slack_channel_webhook_url}",
+                                        action['to'][count] = action['to'][count].replace("https://{slack_channel_webhook_url}",
                                                                                           a['slack_channel_webhook_url'])
                 for r in resolve_regions(region or a.get('regions', ()), a):
                     futures[w.submit(
